@@ -1,6 +1,7 @@
 import pygame
 import random
 import os
+import asyncio
 
 # Inicializar pygame
 pygame.init()
