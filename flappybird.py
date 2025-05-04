@@ -22,12 +22,13 @@ pipe_up_img = pygame.image.load("assets/pipeup.png")
 pipe_down_img = pygame.image.load("assets/pipedown.png")
 point_sound = pygame.mixer.Sound("assets/point.mp3")
 jump_sound = pygame.mixer.Sound("assets/jump.mp3")
+death_sound = pygame.mixer.Sound("assets/death.mp3") 
 pipe_width = 52
-pipe_gap = 150
-pipe_speed = 5  # velocidad base
+pipe_gap = 280
+pipe_speed = 3 # velocidad base
 
 # Variables del juego
-gravity = 0.7
+gravity = 0.25
 bird_y = HEIGHT // 2
 bird_x = 50
 velocity = 0
@@ -40,7 +41,7 @@ title_font = pygame.font.Font(None, 48)  # Fuente más grande para el título
 small_font = pygame.font.Font(None, 28)  # Fuente más pequeña
 clock = pygame.time.Clock()
 fps = 30
-response_factor = 0.03
+response_factor = 0.01
 
 game_state = "menu"  # Estados: "menu", "playing", "game_over"
 
@@ -80,6 +81,8 @@ def create_tube():
     gap_y = max(min_gap_y, min(max_gap_y, responsive_y))
     tubes.append({"x": WIDTH, "gap_y": gap_y, "scored": False})
 
+  
+
 def reset_game():
     global bird_y, velocity, tubes, prev_bird_y, score, pipe_speed, game_state
     bird_y = HEIGHT // 2
@@ -87,7 +90,7 @@ def reset_game():
     tubes.clear()
     prev_bird_y = bird_y
     score = 0
-    pipe_speed = 5
+    pipe_speed = 1
     for _ in range(3):
         create_tube()
         tubes[-1]["scored"] = True
@@ -160,7 +163,7 @@ while running:
             if event.key == pygame.K_RETURN and game_state == "menu":
                 reset_game()
             if event.key == pygame.K_SPACE and game_state == "playing":
-                velocity = -8
+                velocity = -7
                 jump_sound.play()
             if event.key == pygame.K_r and game_state == "game_over":
                 reset_game()
@@ -176,15 +179,15 @@ while running:
             screen.blit(pipe_down_img, (tube["x"], tube["gap_y"] - pipe_down_img.get_height()))
             screen.blit(pipe_up_img, (tube["x"], tube["gap_y"] + pipe_gap))
 
-            # Detectar si el pájaro ha pasado el tubo (solo si no estaba marcado)
+                       # Detectar si el pájaro ha pasado el tubo (solo si no estaba marcado)
             if not tube.get("scored", False) and tube["x"] + pipe_width < bird_x:
                 score += 1
                 point_sound.play()  # <-- Reproducir sonido
                 tube["scored"] = True
 
                 # Aumentar velocidad cada 3 puntos
-                if score % 3 == 0:
-                    pipe_speed += 1
+                if score % 5 == 0 and pipe_speed < 8 :
+                    pipe_speed += 0.5
 
                 # Actualizar high score si es necesario
                 if score > high_score:
@@ -205,11 +208,14 @@ while running:
         for tube in tubes:
             if (bird_x + 40 > tube["x"] and bird_x < tube["x"] + pipe_width and
                     (bird_y < tube["gap_y"] or bird_y + 40 > tube["gap_y"] + pipe_gap)):
+                death_sound.play
                 game_state = "game_over"
-
+    
         # Colisión con el suelo o el techo
         if bird_y >= HEIGHT - 40 or bird_y <= 0:
+            death_sound.play
             game_state = "game_over"
+            
 
         # Dibujar puntaje actual y high score
         score_text = font.render(f"Puntuación: {score}", True, (255, 255, 255))

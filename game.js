@@ -23,7 +23,7 @@ let pipes = [];
 let score = 0;
 let highScore = parseInt(localStorage.getItem("flappyHighScore")) || 0;
 let gameState = "menu";
-let pipeSpeed = 2;
+let pipeSpeed = 1;
 let frame = 0;
 
 // Load assets
@@ -42,6 +42,7 @@ pipeDownImg.src = "assets/pipedown.png";
 // Sounds
 const pointSound = new Audio("assets/point.mp3");
 const jumpSound = new Audio("assets/jump.mp3");
+const deathSound = new Audio("assets/death.mp3")
 
 function resetGame() {
   bird.y = HEIGHT / 2;
@@ -110,7 +111,7 @@ function update() {
         pointSound.play();
         pipe.scored = true;
 
-        if (score % 3 === 0) pipeSpeed += 1;
+        if (score % 5 === 0) pipeSpeed += 0.5;
 
         if (score > highScore) {
           highScore = score;
@@ -190,6 +191,7 @@ document.addEventListener("keydown", (e) => {
     bird.velocity = bird.jumpStrength;
     jumpSound.play();
   } else if (e.key === "r" && gameState === "game_over") {
+    deathSound.play
     resetGame();
   }
 });
